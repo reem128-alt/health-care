@@ -16,8 +16,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000", 
-      "https://blog-seven-sigma-81.vercel.app",
-      "https://blog-frontend-1-97ay.onrender.com"
+      "https://health-care-qw9j.vercel.app/"
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
