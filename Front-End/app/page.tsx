@@ -277,7 +277,9 @@ export default async function Home() {
             {Array.isArray(doctors) && doctors?.map((doctor) => (
               <div key={doctor._id} className="flex flex-col items-center">
                 <DoctorCard
-                {...doctor} />
+                {...doctor}
+              
+                />
                 
                 <div className="mt-4 flex items-center space-x-6">
                   <div className="flex items-center text-gray-700">
