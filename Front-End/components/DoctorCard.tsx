@@ -52,7 +52,7 @@ const DoctorCard: FC<DoctorCardProps> = ({
   };
 
   return (
-    <div className="group relative">
+    <div className="group relative sm:w-[400px]">
       {/* Decorative border */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-blue-500 rounded-2xl opacity-50 group-hover:opacity-100 transition duration-300 blur"></div>
       
