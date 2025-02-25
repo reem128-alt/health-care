@@ -48,7 +48,7 @@ export function Navigation() {
             href="/blog" 
             className="text-white hover:text-teal-100 transition-colors font-medium"
           >
-            Blog
+            Blogs
           </Link>
           {isSignedIn ? (
             <div className="flex items-center space-x-6">
@@ -146,7 +146,7 @@ export function Navigation() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 <BookOpen className="h-5 w-5" />
-                <span>Blog</span>
+                <span>Blogs</span>
               </Link>
 
               {isSignedIn && (
