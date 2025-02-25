@@ -354,7 +354,7 @@ export default function Dashboard() {
     setIsSubmitting(true)
 
     try {
-      console.log('Updating blog with ID:', editingBlog._id)
+     // console.log('Updating blog with ID:', editingBlog._id)
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', content);
@@ -371,7 +371,10 @@ export default function Dashboard() {
       }
 
       // Only reset and close if update was successful
-      await getAllBlogs() // Refresh the blogs list first
+      const updatedBlog = blogs.map(doc => 
+        doc._id === editingBlog._id ? { ...doc, ...response } : doc
+      );
+      setBlogs(updatedBlog); // Refresh the blogs list first
       resetForm()
       setShowBlogModal(false)
       setEditingBlog(null)
@@ -485,7 +488,7 @@ export default function Dashboard() {
             onClick={() => setActiveTab("doctors")}
             className={`flex items-center px-4 py-2 rounded-lg ${
               activeTab === "doctors"
-                ? "bg-purple-600 text-white"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
@@ -521,14 +524,14 @@ export default function Dashboard() {
             <div className="flex justify-end mb-6">
               <button
                 onClick={() => setShowDoctorModal(true)}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-400 transition-colors flex items-center"
               >
                 <Plus className="mr-2 h-5 w-5" />
                 Add Doctor
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 ">
               {doctors.map((doctor) => (
                 <DoctorCard
                   key={doctor._id}
