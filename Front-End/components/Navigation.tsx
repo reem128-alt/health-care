@@ -8,20 +8,20 @@ import Image from "next/image"
 import {
   Home,
   UserRound,
-  ClipboardList,
   Menu,
   X,
   BookOpen,
-  CalendarClock
+  CalendarClock,
+  BookDashedIcon,
+  BookIcon
 } from "lucide-react"
 
 export function Navigation() {
-  const { isSignedIn, isLoaded, user } = useUser()
+  const { isSignedIn, isLoaded} = useUser()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
 
   // Check if user is admin based on their email
-  const isAdmin = isSignedIn && user?.primaryEmailAddress?.emailAddress === "admin@example.com"
 
   // Don't render navigation until user state is loaded
   if (!isLoaded) {
@@ -54,19 +54,19 @@ export function Navigation() {
             <div className="flex items-center space-x-6">
               <Link 
                 href="/dashboard" 
-                className="text-white hover:text-teal-100 transition-colors font-medium"
+                className="text-white hover:text-teal-100 transition-colors font-medium max-md:hidden"
               >
                 Dashboard
               </Link>
               <Link 
                 href="/appointment" 
-                className="text-white hover:text-teal-100 transition-colors font-medium"
+                className="text-white hover:text-teal-100 transition-colors font-medium max-md:hidden"
               >
                 Book Appointment
               </Link>
               <Link 
                 href="/my-appointments" 
-                className="text-white hover:text-teal-100 transition-colors font-medium"
+                className="text-white hover:text-teal-100 transition-colors font-medium max-md:hidden"
               >
                 My Appointments
               </Link>
@@ -150,6 +150,7 @@ export function Navigation() {
               </Link>
 
               {isSignedIn && (
+                <>
                 <Link
                   href="/my-appointments"
                   className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 ${
@@ -160,20 +161,32 @@ export function Navigation() {
                   <CalendarClock className="h-5 w-5" />
                   <span>My Appointments</span>
                 </Link>
+                <Link 
+                href="/dashboard" 
+                className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 ${
+                  pathname === "/dashboard" ? "bg-blue-50 text-blue-600" : "text-gray-700"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+               <BookDashedIcon />
+
+                <span>Dashboard</span>
+              </Link>
+              <Link 
+                href="/appointment" 
+                className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 ${
+                  pathname === "/appointment" ? "bg-blue-50 text-blue-600" : "text-gray-700"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <BookIcon />
+                <span>Book Appointment</span>
+              </Link>
+              </>
+                
               )}
 
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 ${
-                    pathname === "/admin" ? "bg-blue-50 text-blue-600" : "text-gray-700"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <ClipboardList className="h-5 w-5" />
-                  <span>Admin</span>
-                </Link>
-              )}
+              
             </div>
           </div>
         </div>
