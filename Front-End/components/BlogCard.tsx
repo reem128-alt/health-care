@@ -75,7 +75,7 @@ export default function BlogCard({
   };
 
   return (
-    <div className="group relative h-[28rem]">
+    <div className="group relative h-[28rem] sm:w-[400px] max-sm:w-full">
       {/* Decorative border */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-2xl opacity-50 group-hover:opacity-100 transition duration-300 blur"></div>
       
