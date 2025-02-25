@@ -82,7 +82,7 @@ export default function BlogCard({
       {/* Main card content */}
       <div className="relative h-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
         {/* Image section - fixed height */}
-        <div className="relative h-48 w-full">
+        <div className="relative h-64 w-full">
           {imageUrl ? (
             <div className="w-full h-full">
               <img
