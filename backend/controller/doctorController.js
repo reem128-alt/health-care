@@ -125,12 +125,13 @@ const updateDoctor = async (req, res) => {
       }
 
       // Upload new image to Cloudinary
-      if (!req.file.buffer) {
-        throw new Error('File buffer is undefined');
-      }
-      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
-        folder: 'doctors'
-      });
+      const result = req.file.buffer
+        ? await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+            folder: 'doctors'
+          })
+        : await cloudinary.uploader.upload(req.file.path, {
+            folder: 'doctors'
+          });
       updateData.imageUrl = result.url;
     }
 
