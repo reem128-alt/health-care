@@ -1,6 +1,12 @@
 const Doctor = require('../model/Doctor');
 const errorHandler = require('../middleware/error');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Get all doctors
 const getAllDoctors = async (req, res, next) => {
@@ -39,9 +45,6 @@ const getDoctorById = async (req, res, next) => {
 // Create a new doctor
 const createDoctor = async (req, res) => {
   try {
-    console.log("Request body:", req.body);
-    console.log("Request file:", req.file);
-    
     const doctorData = { ...req.body };
 
     // Parse experience if it's a string
@@ -64,8 +67,16 @@ const createDoctor = async (req, res) => {
 
     // Add image URL if an image was uploaded
     if (req.file) {
-      console.log('Uploaded file:', req.file);
-      doctorData.imageUrl = `/uploads/${req.file.filename}`;  // Use the generated filename instead of original name
+      const uploadOptions = {
+        folder: 'doctors'
+      };
+
+      // Use buffer if available, otherwise use file path
+      const result = req.file.buffer 
+        ? await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, uploadOptions)
+        : await cloudinary.uploader.upload(req.file.path, uploadOptions);
+      
+      doctorData.imageUrl = result.url;
     }
 
     const doctor = new Doctor(doctorData);
@@ -107,16 +118,20 @@ const updateDoctor = async (req, res) => {
 
     // Handle image update if a new image is uploaded
     if (req.file) {
-      console.log('Uploaded file:', req.file);
-      // Delete old image if it exists
+      // Delete previous image from Cloudinary if it exists
       if (doctor.imageUrl) {
-        const oldImagePath = doctor.imageUrl.replace('/uploads/', '');
-        const fullPath = `uploads/${oldImagePath}`;
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-        }
+        const publicId = doctor.imageUrl.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`doctors/${publicId}`);
       }
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+
+      // Upload new image to Cloudinary
+      if (!req.file.buffer) {
+        throw new Error('File buffer is undefined');
+      }
+      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+        folder: 'doctors'
+      });
+      updateData.imageUrl = result.url;
     }
 
     const updatedDoctor = await Doctor.findByIdAndUpdate(
@@ -132,7 +147,6 @@ const updateDoctor = async (req, res) => {
   }
 };
 
-
 // Delete a doctor
 const deleteDoctor = async (req, res) => {
   try {
@@ -141,13 +155,10 @@ const deleteDoctor = async (req, res) => {
       return res.status(404).json({ message: 'Doctor not found' });
     }
 
-    // Delete associated image if it exists
+    // Delete associated image from Cloudinary if it exists
     if (doctor.imageUrl) {
-      const imagePath = doctor.imageUrl.replace('/uploads/', '');
-      const fullPath = `uploads/${imagePath}`;
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
-      }
+      const publicId = doctor.imageUrl.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`doctors/${publicId}`);
     }
 
     await Doctor.findByIdAndDelete(req.params.id);
