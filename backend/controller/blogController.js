@@ -1,6 +1,13 @@
 const Blog = require('../model/Blog');
 const errorHandler = require('../middleware/error');
 const fs = require('fs');
+const cloudinary=require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Get all blogs
 const getAllBlogs = async (req, res, next) => {
@@ -32,13 +39,23 @@ const getBlogById = async (req, res, next) => {
 const createBlog = async (req, res, next) => {
   try {
     const blogData = req.body;
-    
+    let imagePath = null;
     // Add image URL if an image was uploaded
     if (req.file) {
-      blogData.imageUrl = `/uploads/${req.file.filename}`;
+      console.log(req.file)
+      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+        folder: 'blogs'
+      } );
+      imagePath = result.url;
     }
 
-    const blog = new Blog(blogData);
+    const blog = new Blog({
+      title: blogData.title,
+      content: blogData.content,
+      shortDescription: blogData.shortDescription,
+      author: blogData.author,
+      imageUrl: imagePath
+    });
     const newBlog = await blog.save();
     res.status(201).json(newBlog);
   } catch (error) {
@@ -58,15 +75,21 @@ const updateBlog = async (req, res, next) => {
 
     // Handle image update if a new image is uploaded
     if (req.file) {
-      // Delete old image if it exists
+      // Delete previous image from Cloudinary if it exists
       if (blog.imageUrl) {
-        const oldImagePath = blog.imageUrl.replace('/uploads/', '');
-        const fullPath = `uploads/${oldImagePath}`;
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-        }
+        const publicId = blog.imageUrl.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`blogs/${publicId}`);
       }
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+
+      // Upload new image to Cloudinary
+      const result = req.file.buffer
+        ? await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
+            folder: 'blogs'
+          })
+        : await cloudinary.uploader.upload(req.file.path, {
+            folder: 'blogs'
+          });
+      updateData.imageUrl = result.url;
     }
 
     const updatedBlog = await Blog.findByIdAndUpdate(
