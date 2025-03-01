@@ -4,7 +4,6 @@ import type { FC } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Clock, UserRound, Pencil, Trash2 } from 'lucide-react';
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
 
 interface DoctorCardProps {
   _id: string;
@@ -66,8 +65,7 @@ const DoctorCard: FC<DoctorCardProps> = ({
                   <UserRound className="w-24 h-24 text-teal-500/70" />
                 </div>
                 <Image
-                  src={`${API_URL}${imageUrl}`}
-                     
+                  src={imageUrl}
                   alt={name}
                   width={400}
                   height={400}
