@@ -255,7 +255,7 @@ export default function DoctorProfile({ params }: { params: Promise<{ id: string
             <div className="relative w-48 h-48 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full mb-6">
               {doctor.imageUrl ? (
                 <img
-                  src={`${API_URL}${doctor.imageUrl}`}
+                  src={doctor.imageUrl}
                   alt={doctor.name}
                   className="w-full h-full object-cover rounded-full"
                 />
