@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { ArrowRight, Calendar, User, Trash2, Heart, Pencil } from 'lucide-react';
-const url = process.env.NEXT_PUBLIC_API_URL;
+
 
 export interface Blog {
   _id: string;
@@ -53,7 +53,7 @@ export default function BlogCard({
   const imageUrl = blog?.imageUrl ?? propImageUrl;
   const createdAt = blog?.createdAt ?? propCreatedAt;
 
-  console.log(url)
+
 
   const formattedDate = createdAt 
     ? new Intl.DateTimeFormat('en-US', {
@@ -86,7 +86,7 @@ export default function BlogCard({
           {imageUrl ? (
             <div className="w-full h-full">
               <img
-                src={`${url}${imageUrl}`}
+                src={imageUrl}
                 alt={title}
                 className="w-full h-full object-cover"
               />
