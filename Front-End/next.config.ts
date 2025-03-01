@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
         pathname: '/uploads/**',
       },
     ],
-    domains: ['health-care-5wrp.onrender.com'],
+    domains: ['health-care-5wrp.onrender.com', 'res.cloudinary.com'],
   },
 };
 
