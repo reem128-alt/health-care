@@ -115,7 +115,7 @@ export default function BlogCard({
             {title}
           </h3>
 
-          <p className="text-gray-600 mb-4 line-clamp-2 overflow-hidden">
+          <p className="text-gray-600 mb-4 line-clamp-1 overflow-hidden">
             {shortDescription || content}
           </p>
 
