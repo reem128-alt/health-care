@@ -1,7 +1,7 @@
-const Blog = require('../model/Blog');
-const errorHandler = require('../middleware/error');
-const fs = require('fs');
-const cloudinary=require('cloudinary').v2;
+const Blog = require("../model/Blog");
+const errorHandler = require("../middleware/error");
+const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -14,7 +14,7 @@ const getAllBlogs = async (req, res, next) => {
   try {
     const blogs = await Blog.find().sort({ createdAt: -1 }); // Sort by newest first
     if (!blogs) {
-      return next(errorHandler(404, 'No blogs found'));
+      return next(errorHandler(404, "No blogs found"));
     }
     res.status(200).json(blogs);
   } catch (error) {
@@ -27,7 +27,7 @@ const getBlogById = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
-      return next(errorHandler(404, 'Blog not found'));
+      return next(errorHandler(404, "Blog not found"));
     }
     res.status(200).json(blog);
   } catch (error) {
@@ -42,11 +42,21 @@ const createBlog = async (req, res, next) => {
     let imagePath = null;
     // Add image URL if an image was uploaded
     if (req.file) {
-      console.log(req.file)
-      const result = await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
-        folder: 'blogs'
-      } );
-      imagePath = result.url;
+      const uploadOptions = {
+        folder: "blogs",
+      };
+
+      // Use buffer if available, otherwise use file path
+      const result = req.file.buffer
+        ? await cloudinary.uploader.upload(
+            `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+              "base64"
+            )}`,
+            uploadOptions
+          )
+        : await cloudinary.uploader.upload(req.file.path, uploadOptions);
+
+      blogData.imageUrl = result.url;
     }
 
     const blog = new Blog({
@@ -54,7 +64,7 @@ const createBlog = async (req, res, next) => {
       content: blogData.content,
       shortDescription: blogData.shortDescription,
       author: blogData.author,
-      imageUrl: imagePath
+      imageUrl: imagePath,
     });
     const newBlog = await blog.save();
     res.status(201).json(newBlog);
@@ -68,7 +78,7 @@ const updateBlog = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
-      return next(errorHandler(404, 'Blog not found'));
+      return next(errorHandler(404, "Blog not found"));
     }
 
     const updateData = req.body;
@@ -77,17 +87,22 @@ const updateBlog = async (req, res, next) => {
     if (req.file) {
       // Delete previous image from Cloudinary if it exists
       if (blog.imageUrl) {
-        const publicId = blog.imageUrl.split('/').pop().split('.')[0];
+        const publicId = blog.imageUrl.split("/").pop().split(".")[0];
         await cloudinary.uploader.destroy(`blogs/${publicId}`);
       }
 
       // Upload new image to Cloudinary
       const result = req.file.buffer
-        ? await cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`, {
-            folder: 'blogs'
-          })
+        ? await cloudinary.uploader.upload(
+            `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+              "base64"
+            )}`,
+            {
+              folder: "blogs",
+            }
+          )
         : await cloudinary.uploader.upload(req.file.path, {
-            folder: 'blogs'
+            folder: "blogs",
           });
       updateData.imageUrl = result.url;
     }
@@ -109,12 +124,12 @@ const deleteBlog = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
-      return next(errorHandler(404, 'Blog not found'));
+      return next(errorHandler(404, "Blog not found"));
     }
 
     // Delete associated image if it exists
     if (blog.imageUrl) {
-      const imagePath = blog.imageUrl.replace('/uploads/', '');
+      const imagePath = blog.imageUrl.replace("/uploads/", "");
       const fullPath = `uploads/${imagePath}`;
       if (fs.existsSync(fullPath)) {
         fs.unlinkSync(fullPath);
@@ -122,7 +137,7 @@ const deleteBlog = async (req, res, next) => {
     }
 
     await Blog.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: 'Blog deleted successfully' });
+    res.status(200).json({ message: "Blog deleted successfully" });
   } catch (error) {
     next(error);
   }
@@ -133,5 +148,5 @@ module.exports = {
   getBlogById,
   createBlog,
   updateBlog,
-  deleteBlog
+  deleteBlog,
 };
