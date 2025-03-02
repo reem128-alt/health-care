@@ -111,7 +111,7 @@ export default function BlogCard({
             </div>
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 overflow-hidden">
             {title}
           </h3>
 
