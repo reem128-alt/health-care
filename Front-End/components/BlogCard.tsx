@@ -116,7 +116,7 @@ export default function BlogCard({
           </h3>
 
           <p className="text-gray-600 mb-4 line-clamp-1 overflow-hidden">
-            {shortDescription || content}
+            {shortDescription.slice(0,40) || content}
           </p>
 
           <div className="flex justify-between items-center mt-auto">
