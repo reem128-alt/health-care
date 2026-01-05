@@ -23,7 +23,6 @@ import {
   type CreateAppointmentData
 } from "@/services/appointmant";
 import { getDoctorById } from "@/services/doctor";
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
 
 interface Doctor {
   _id: string;
