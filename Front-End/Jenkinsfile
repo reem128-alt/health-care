@@ -1,0 +1,46 @@
+pipeline {
+  agent any
+
+  options {
+    ansiColor('xterm')
+    timestamps()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Install dependencies') {
+      steps {
+        dir('Front-End') {
+          bat 'npm install'
+        }
+      }
+    }
+
+    stage('Lint') {
+      steps {
+        dir('Front-End') {
+          bat 'npm run lint'
+        }
+      }
+    }
+
+    stage('Build') {
+      steps {
+        dir('Front-End') {
+          bat 'npm run build'
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'Front-End/.next/**', onlyIfSuccessful: true, allowEmptyArchive: true
+    }
+  }
+}

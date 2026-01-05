@@ -1,0 +1,60 @@
+pipeline {
+  agent any
+
+  options {
+    ansiColor('xterm')
+    timestamps()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Install dependencies') {
+      steps {
+        dir('backend') {
+          bat 'npm install'
+        }
+      }
+    }
+
+    stage('Lint') {
+      when {
+        expression { fileExists('backend/.eslintrc.js') || fileExists('backend/.eslintrc.json') }
+      }
+      steps {
+        dir('backend') {
+          bat 'npm run lint'
+        }
+      }
+    }
+
+    stage('Test') {
+      when {
+        expression { fileExists('backend/package.json') }
+      }
+      steps {
+        dir('backend') {
+          bat 'npm test'
+        }
+      }
+    }
+
+    stage('Build/Start') {
+      steps {
+        dir('backend') {
+          bat 'npm run build || npm run start'
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'backend/**/*', allowEmptyArchive: true
+    }
+  }
+}
