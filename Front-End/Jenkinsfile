@@ -12,6 +12,16 @@ pipeline {
       }
     }
 
+    stage('Prepare env file') {
+      steps {
+        dir('Front-End') {
+          withCredentials([file(credentialsId: 'frontend-env-file', variable: 'ENV_FILE')]) {
+            bat 'copy "%ENV_FILE%" ".env" /Y'
+          }
+        }
+      }
+    }
+
     stage('Install dependencies') {
       steps {
         dir('Front-End') {
