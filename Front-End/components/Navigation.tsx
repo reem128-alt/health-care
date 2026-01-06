@@ -17,40 +17,22 @@ import {
 } from "lucide-react"
 
 export function Navigation() {
-  const { isSignedIn, isLoaded} = useUser()
+  const { isSignedIn, isLoaded } = useUser()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
 
-  // Check if user is admin based on their email
-
-  // Don't render navigation until user state is loaded
-  if (!isLoaded) {
-    return null
-  }
-
-  return (
-    <header className="bg-gradient-to-r from-teal-600 to-blue-600">
-      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <Link 
-          href="/" 
-          className="text-xl font-bold text-white hover:text-teal-100 transition-colors"
-        >
-          <Image src="/placeholder-doctor.png" alt="Health Platform Logo" width={80} height={80} />
-        </Link>
+  const renderAuthLinks = () => {
+    if (!isLoaded) {
+      return (
         <div className="flex items-center space-x-6">
-          <Link 
-            href="/doctors" 
-            className="text-white hover:text-teal-100 transition-colors font-medium"
-          >
-             Doctors
-          </Link>
-          <Link 
-            href="/blog" 
-            className="text-white hover:text-teal-100 transition-colors font-medium"
-          >
-            Blogs
-          </Link>
-          {isSignedIn ? (
+          <div className="h-4 w-24 rounded-full bg-white/30 animate-pulse" />
+          <div className="h-10 w-10 rounded-full bg-white/30 animate-pulse" />
+        </div>
+      )
+    }
+
+    if (isSignedIn) {
+      return (
             <div className="flex items-center space-x-6">
               <Link 
                 href="/dashboard" 
@@ -84,14 +66,42 @@ export function Navigation() {
                 </div>
               </div>
             </div>
-          ) : (
-            <Link 
-              href="/sign-in" 
-              className="bg-white text-teal-600 hover:bg-teal-100 font-bold py-2 px-6 rounded-full transition-colors"
-            >
-              Sign In
-            </Link>
-          )}
+          )
+    }
+
+    return (
+      <Link 
+        href="/sign-in" 
+        className="bg-white text-teal-600 hover:bg-teal-100 font-bold py-2 px-6 rounded-full transition-colors"
+      >
+        Sign In
+      </Link>
+    )
+  }
+
+  return (
+    <header className="bg-gradient-to-r from-teal-600 to-blue-600">
+      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
+        <Link 
+          href="/" 
+          className="text-xl font-bold text-white hover:text-teal-100 transition-colors"
+        >
+          <Image src="/placeholder-doctor.png" alt="Health Platform Logo" width={80} height={80} />
+        </Link>
+        <div className="flex items-center space-x-6">
+          <Link 
+            href="/doctors" 
+            className="text-white hover:text-teal-100 transition-colors font-medium"
+          >
+             Doctors
+          </Link>
+          <Link 
+            href="/blog" 
+            className="text-white hover:text-teal-100 transition-colors font-medium"
+          >
+            Blogs
+          </Link>
+          {renderAuthLinks()}
           <button
             onClick={() => setIsMenuOpen(true)}
             className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
