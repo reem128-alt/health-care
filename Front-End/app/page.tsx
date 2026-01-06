@@ -1,27 +1,51 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Heart, Users, Clock, Award, CheckCircle, ArrowRight, Brain, Stethoscope } from "lucide-react"
 import DoctorCard from "@/components/DoctorCard"
 import BlogCard from "@/components/BlogCard"
-import { getAllDoctors ,Doctor} from "@/services/doctor"
-import { getAllBlogs ,Blog} from "@/services/blog"
+import { getAllDoctors, Doctor } from "@/services/doctor"
+import { getAllBlogs, Blog } from "@/services/blog"
 
+export default function Home() {
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [latestBlogs, setLatestBlogs] = useState<Blog[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-export const dynamic = 'force-dynamic'
+  useEffect(() => {
+    let isMounted = true
 
-export default async function Home() {
-  let doctors: Doctor[] = [];
-  let latestBlogs: Blog[] = [];
-  
-  try {
-    [doctors, latestBlogs] = await Promise.all([
-      getAllDoctors(3),
-      getAllBlogs()
-    ]);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    // Continue with empty data rather than crashing
-  }
+    const fetchData = async () => {
+      try {
+        const [doctorData, blogData] = await Promise.all([
+          getAllDoctors(3),
+          getAllBlogs(),
+        ])
+
+        if (!isMounted) return
+        setDoctors(doctorData)
+        setLatestBlogs(blogData.slice(0, 3))
+        setError(null)
+      } catch (err) {
+        console.error("Error fetching data:", err)
+        if (!isMounted) return
+        setError("Our API is waking up. Loading data…")
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchData()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   return (
     <main>
@@ -44,6 +68,13 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Notification */}
+      {(loading || error) && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-center py-3 px-4">
+          {error ?? "Fetching fresh data…"}
+        </div>
+      )}
 
       {/* Services Section */}
       <section className="py-20 bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50">
@@ -274,25 +305,45 @@ export default async function Home() {
           </div>
 
           <div className="flex flex-wrap gap-4">
-            {Array.isArray(doctors) && doctors?.map((doctor) => (
-              <div key={doctor._id} className="flex flex-col items-center">
-                <DoctorCard
-                {...doctor}
-              
-                />
-                
-                <div className="mt-4 flex items-center space-x-6">
-                  <div className="flex items-center text-gray-700">
-                    <Clock className="w-5 h-5 mr-2 text-teal-600" />
-                    <span>{doctor.experience?.years || 0} Years Experience</span>
-                  </div>
-                  <div className="flex items-center text-gray-700">
-                    <Users className="w-5 h-5 mr-2 text-blue-600" />
-                    <span>{doctor.experience?.patientsServed || 0} Patients</span>
+            {loading && doctors.length === 0 ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div
+                  key={`doctor-skeleton-${idx}`}
+                  className="h-72 w-full md:w-[340px] rounded-2xl bg-white shadow animate-pulse p-6 space-y-4"
+                >
+                  <div className="h-32 rounded-xl bg-slate-100" />
+                  <div className="h-4 rounded bg-slate-100 w-2/3" />
+                  <div className="h-4 rounded bg-slate-100 w-1/2" />
+                  <div className="flex gap-4">
+                    <div className="h-4 rounded bg-slate-100 flex-1" />
+                    <div className="h-4 rounded bg-slate-100 flex-1" />
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              doctors.map((doctor) => (
+                <div key={doctor._id} className="flex flex-col items-center">
+                  <DoctorCard {...doctor} />
+
+                  <div className="mt-4 flex items-center space-x-6">
+                    <div className="flex items-center text-gray-700">
+                      <Clock className="w-5 h-5 mr-2 text-teal-600" />
+                      <span>{doctor.experience?.years || 0} Years Experience</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <Users className="w-5 h-5 mr-2 text-blue-600" />
+                      <span>{doctor.experience?.patientsServed || 0} Patients</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {!loading && doctors.length === 0 && (
+              <p className="text-center text-gray-600 w-full">
+                We&rsquo;re updating our roster. Please check back soon!
+              </p>
+            )}
           </div>
 
           <div className="text-center mt-12">
@@ -318,12 +369,27 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {latestBlogs.slice(0, 3)?.map((blog) => (
-              <BlogCard 
-                key={blog._id}
-                {...blog}
-              />
-            ))}
+            {loading && latestBlogs.length === 0
+              ? Array.from({ length: 3 }).map((_, idx) => (
+                  <div
+                    key={`blog-skeleton-${idx}`}
+                    className="rounded-2xl bg-white p-6 shadow animate-pulse space-y-4"
+                  >
+                    <div className="h-40 rounded-xl bg-slate-100" />
+                    <div className="h-4 rounded bg-slate-100 w-3/4" />
+                    <div className="h-4 rounded bg-slate-100 w-1/2" />
+                    <div className="h-4 rounded bg-slate-100 w-1/3" />
+                  </div>
+                ))
+              : latestBlogs.map((blog) => (
+                  <BlogCard key={blog._id} {...blog} />
+                ))}
+
+            {!loading && latestBlogs.length === 0 && (
+              <p className="text-center text-gray-600 w-full">
+                No articles yet—our authors are preparing fresh insights.
+              </p>
+            )}
           </div>
 
           <div className="text-center mt-12">
