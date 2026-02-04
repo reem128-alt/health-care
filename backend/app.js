@@ -45,6 +45,21 @@ app.use("/doctors", doctorRoute);
 app.use("/blogs", blogRoute);
 app.use("/appointments", appointmentRoute);
 
+// Global error handler middleware (must be after routes)
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  
+  // Set status code
+  const statusCode = err.statusCode || err.status || 500;
+  
+  // Send JSON response instead of HTML
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
+
 app.listen(5000, () => {
   console.log("server is running");
 });

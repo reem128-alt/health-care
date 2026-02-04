@@ -64,7 +64,7 @@ const createBlog = async (req, res, next) => {
       content: blogData.content,
       shortDescription: blogData.shortDescription,
       author: blogData.author,
-      imageUrl: imagePath,
+      imageUrl: blogData.imageUrl,
     });
     const newBlog = await blog.save();
     res.status(201).json(newBlog);

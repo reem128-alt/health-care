@@ -27,14 +27,19 @@ const storage = multer.diskStorage({
 // File filter function
 const fileFilter = (req, file, cb) => {
   console.log("Filtering file:", file);
-  const filetypes = /jpeg|jpg|png|gif/;
-  const mimetype = filetypes.test(file.mimetype);
+  console.log("File mimetype:", file.mimetype);
+  console.log("File originalname:", file.originalname);
+  
+  const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  const filetypes = /jpeg|jpg|png|gif|webp/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
-  if (mimetype && extname) {
+  if (allowedMimeTypes.includes(file.mimetype) || extname) {
     return cb(null, true);
   }
-  cb(new Error("Only image files (jpeg, jpg, png, gif) are allowed!"));
+  
+  console.error("File rejected - mimetype:", file.mimetype, "extension:", path.extname(file.originalname));
+  cb(new Error("Only image files (jpeg, jpg, png, gif, webp) are allowed!"));
 };
 
 // Create multer upload instance with error handling
